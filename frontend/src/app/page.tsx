@@ -1,15 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { Typewriter } from "react-simple-typewriter";
+import Lottie from "react-lottie-player";
+import loaderData from "@/animation/ai-loader.json";
 
 export default function Home() {
   const [symptoms, setSymptoms] = useState("");
   const [advice, setAdvice] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const analyzeSymptoms = async () => {
+  const handleAnalyze = async () => {
+    if (!symptoms.trim()) return;
     setLoading(true);
     setAdvice("");
+
     try {
       const res = await fetch("http://localhost:5000/api/analyze/symptoms", {
         method: "POST",
@@ -18,34 +23,76 @@ export default function Home() {
         },
         body: JSON.stringify({ symptoms }),
       });
+
       const data = await res.json();
-      setAdvice(data.advice);
+
+      if (data.status === "ok") {
+        setAdvice(data.advice);
+      } else {
+        setAdvice("AI could not analyze your symptoms right now. Please try again.");
+      }
     } catch (error) {
-      setAdvice("Failed to get advice. Please try again.");
+      console.error(error);
+      setAdvice("Error contacting AI server. Please try again later.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <main className="flex flex-col min-h-screen items-center justify-center bg-gradient-to-r from-green-400 to-blue-500 p-4">
-      <h1 className="text-3xl font-bold text-white mb-4">HealthEcho Symptom Analyzer 🚑</h1>
-      <textarea
-        value={symptoms}
-        onChange={(e) => setSymptoms(e.target.value)}
-        placeholder="Describe your symptoms..."
-        className="w-full max-w-md p-3 rounded border border-gray-300 mb-4"
-        rows={4}
-      />
-      <button
-        onClick={analyzeSymptoms}
-        disabled={loading}
-        className="bg-white text-green-600 font-semibold px-6 py-2 rounded shadow hover:bg-green-100 transition"
-      >
-        {loading ? "Analyzing..." : "Analyze Symptoms"}
-      </button>
-      {advice && (
-        <p className="mt-6 text-white text-lg text-center">{advice}</p>
-      )}
+    <main
+      className="relative w-full h-screen bg-cover bg-center flex items-center justify-center"
+      style={{ backgroundImage: "url('/doctor-bg.png')" }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/60"></div>
+
+      {/* Glass morphic card */}
+      <div className="glass-wrapper">
+        <h1 className="text-3xl font-semibold text-white text-center mb-6">
+          HealthEcho <br /> Symptom Analyzer
+        </h1>
+
+        <input
+          type="text"
+          className="glass-input"
+          placeholder="Describe your symptoms"
+          value={symptoms}
+          onChange={(e) => setSymptoms(e.target.value)}
+        />
+
+        <button
+          className="glass-button"
+          onClick={handleAnalyze}
+          disabled={loading}
+        >
+          {loading ? "Analyzing…" : "Analyze Symptoms"}
+        </button>
+
+        <div className="glass-output">
+          {loading ? (
+            <div className="flex justify-center">
+              <Lottie
+                animationData={loaderData}
+                play
+                loop
+                style={{ width: 80, height: 80 }}
+              />
+            </div>
+          ) : advice ? (
+            <Typewriter
+              words={[advice]}
+              cursor
+              cursorStyle="|"
+              typeSpeed={40}
+              deleteSpeed={0}
+              delaySpeed={500}
+            />
+          ) : (
+            <p className="text-white/70">Your advice will appear here.</p>
+          )}
+        </div>
+      </div>
     </main>
   );
 }
