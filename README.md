@@ -2,7 +2,6 @@
 
 HealthEcho is an AI-powered symptom analysis web application that helps users get friendly, responsible health advice based on their described symptoms. It uses a Next.js + Tailwind CSS frontend and a Node.js + Express backend integrated with Hugging Face large language models.
 
-![HealthEcho Screenshot](https://your-screenshot-url-or-local-path.png)
 
 ---
 
