@@ -1,3 +1,4 @@
+const healthRoutes = require('./routes/health');
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -11,7 +12,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('HealthEcho backend is running! 🚑');
 });
-
+app.use('/api/health', healthRoutes);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
